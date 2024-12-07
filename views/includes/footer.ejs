@@ -21,6 +21,18 @@
                     }
                 });
             }
+
+
+                 // Fonction pour afficher le champ de saisie du nouveau nom du fichier
+            function renameFile(form) {
+                var modalBodyHtml = "<div class='form-group'>";
+                modalBodyHtml += "<label for='new-file-name'>New File Name:</label>";
+                modalBodyHtml += "<input type='text' class='form-control' id='new-file-name' placeholder='Enter new name' required />";
+                modalBodyHtml += "</div>";
+                modalBodyHtml += "<button type='button' class='btn btn-success' onclick='saveNewFileName();'>Save</button>";
+                document.querySelector("#viewFileModal .modal-body").innerHTML = modalBodyHtml;
+                $("#viewFileModal").modal("show");
+            }
             
             // send the request to server to download the file
             function downloadFile(self) {
