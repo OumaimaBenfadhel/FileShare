@@ -90,15 +90,13 @@
                     }
                 </script>
 
-                <form method="POST" action="<%= request.mainURL %>/RenameFile"
-                    id="form-rename-file">
-                    <input type="hidden" name="_id" required />
-
-                    <button type="button" class="btn btn-primary"
-                        onclick="renameFile(this);">
+                <form id="form-rename-file">
+                    <input type="hidden" name="_id" value="67547e3b68964e0c5c243649" required />
+                    <button type="button" class="btn btn-primary" onclick="renameFile(this.form);">
                         Rename File
                     </button>
                 </form>
+
 
                 <form method="POST" action="<%= request.mainURL %>/DeleteFile"
                     id="form-delete-file">

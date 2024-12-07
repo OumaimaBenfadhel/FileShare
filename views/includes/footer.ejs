@@ -23,16 +23,59 @@
             }
 
 
-                 // Fonction pour afficher le champ de saisie du nouveau nom du fichier
-            function renameFile(form) {
-                var modalBodyHtml = "<div class='form-group'>";
-                modalBodyHtml += "<label for='new-file-name'>New File Name:</label>";
-                modalBodyHtml += "<input type='text' class='form-control' id='new-file-name' placeholder='Enter new name' required />";
-                modalBodyHtml += "</div>";
-                modalBodyHtml += "<button type='button' class='btn btn-success' onclick='saveNewFileName();'>Save</button>";
-                document.querySelector("#viewFileModal .modal-body").innerHTML = modalBodyHtml;
-                $("#viewFileModal").modal("show");
+            // Fonction pour afficher le champ de saisie du nouveau nom du fichier
+                    function renameFile(form) {
+            // Ajout du champ de saisie pour le nouveau nom dans la modal
+            var modalBodyHtml = "<div class='form-group'>";
+            modalBodyHtml += "<label for='new-file-name'>New File Name:</label>";
+            modalBodyHtml += "<input type='text' class='form-control' id='new-file-name' placeholder='Enter new name' required />";
+            modalBodyHtml += "</div>";
+            modalBodyHtml += "<button type='button' class='btn btn-success' onclick='saveNewFileName(\"" + form._id.value + "\");'>Save</button>";
+            document.querySelector("#viewFileModal .modal-body").innerHTML = modalBodyHtml;
+
+            // Affiche la modal
+            $("#viewFileModal").modal("show");
+        }
+
+        function saveNewFileName(fileId, oldFileName) {
+            const newFileName = document.querySelector("#new-file-name").value.trim();
+            const fileExtension = oldFileName.split('.').pop(); // Récupère l'extension actuelle
+
+            if (!newFileName) {
+                alert("Veuillez entrer un nouveau nom de fichier.");
+                return;
             }
+
+            const completeFileName = newFileName.includes('.') ? newFileName : `${newFileName}.${fileExtension}`;
+
+            fetch(`/RenameFile`, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                },
+                body: JSON.stringify({
+                    _id: fileId,
+                    newFileName: completeFileName,
+                }),
+            })
+                .then((response) => {
+                    if (response.ok) {
+                        alert("Fichier renommé avec succès !");
+                        location.reload();
+                    } else {
+                        return response.text().then((error) => {
+                            throw new Error(error);
+                        });
+                    }
+                })
+                .catch((error) => {
+                    alert("Erreur lors du renommage : " + error.message);
+                });
+
+            $("#viewFileModal").modal("hide");
+        }
+
+
             
             // send the request to server to download the file
             function downloadFile(self) {

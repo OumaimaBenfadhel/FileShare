@@ -576,6 +576,59 @@ http.listen(3000, function () {
             result.redirect("/Login");
         });
 
+        // Add the new route to rename the uploaded file
+        app.post("/RenameFile", async function (request, result) {
+            const { _id, newName } = request.fields; // Get file ID and new name from the request
+
+            if (request.session.user) {
+                const user = await database.collection("users").findOne({
+                    "_id": ObjectId(request.session.user._id)
+                });
+
+                // Get the file from the user's uploaded files
+                const file = await recursiveGetFile(user.uploaded, _id);
+                
+                if (!file) {
+                    request.session.status = "error";
+                    request.session.message = "File does not exist.";
+                    const backURL = request.header("Referer") || "/";
+                    result.redirect(backURL);
+                    return;
+                }
+
+                // Create new file path with updated name
+                const oldFilePath = file.filePath;
+                const newFilePath = `public/uploads/${user.email}/${new Date().getTime()}-${newName}`;
+                
+                // Rename the file on the file system
+                fileSystem.rename(oldFilePath, newFilePath, async (err) => {
+                    if (err) {
+                        request.session.status = "error";
+                        request.session.message = "Error renaming the file.";
+                        const backURL = request.header("Referer") || "/";
+                        result.redirect(backURL);
+                        return;
+                    }
+
+                    // Update the file metadata in the database
+                    await database.collection("users").updateOne(
+                        { "_id": ObjectId(user._id), "uploaded._id": ObjectId(_id) },
+                        { $set: { "uploaded.$.name": newName, "uploaded.$.filePath": newFilePath } }
+                    );
+
+                    request.session.status = "success";
+                    request.session.message = "File renamed successfully.";
+
+                    const backURL = request.header("Referer") || "/";
+                    result.redirect(backURL);
+                });
+                
+            } else {
+                result.redirect("/Login");
+            }
+        });
+
+
         // logout the user
         app.get("/Logout", function (request, result) {
             request.session.destroy();
